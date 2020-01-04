@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>个人博主登录</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+		<link rel="stylesheet" type="text/css" href="css/util.css">
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/main.js"></script>
+		<script>
+			function login() {
+				var username = $("#username").val();
+				var pwd = $("#password").val();
+				$.ajax({
+					type: 'post',
+					dataType: "json",
+					async: true,
+					url: 'https://api.iocetc.com:8080/task/auth/login',
+					data: {
+						"username": username,
+						"password": pwd
+					},
+					success: function(res) {
+						if(res.errcode == 0) {
+							localStorage.setItem("token", res.data);
+							var top = window;
+							while(top != top.parent) {
+								top = top.parent; //循环找到父窗体
+							}
+							top.location.href = "http://127.0.0.1:8020/Blog/admin/common/adminIndex.html";
+						} else {
+							$("#error").text(res.message);
+						}
+					},
+					error: function() {
+						alert("发生错误");
+					}
+				});
+			}
+		</script>
+	</head>
+
+	<body>
+
+		<div class="limiter">
+			<div class="container-login100" style="background-image: url(img/bg-01.jpg);">
+				<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+					<div class="login100-form validate-form">
+						<span class="login100-form-title p-b-49">登录</span>
+						<div class="wrap-input100 validate-input m-b-23" data-validate="请输入用户名">
+							<!--用户名-->
+							<span class="label-input100">用户名</span>
+							<input class="input100" id="username" type="text" name="username" placeholder="请输入用户名" autocomplete="off"> <span class="focus-input100" data-symbol="&#xf206;"></span>
+							<!--用户名-->
+						</div>
+
+						<div class="wrap-input100 validate-input" data-validate="请输入密码">
+							<!--密码-->
+							<span class="label-input100">密码</span> <input class="input100" id="password" type="password" name="password" placeholder="请输入密码"> <span class="focus-input100" data-symbol="&#xf190;"></span>
+						</div>
+
+						<!--这里显示提示信息-->
+						<P style="margin: 0px 35px 20px 45px;">
+							<span><font color="red" id="error"></font></span>
+							</span>
+						</P>
+						<!--这里显示提示信息-->
+						<div class="container-login100-form-btn">
+							<div class="wrap-login100-form-btn">
+								<div class="login100-form-bgbtn"></div>
+								<button class="login100-form-btn" onclick="login()">登 录</button>
+
+							</div>
+						</div>
+						<div class="container-login100-form-btn">
+							<div class="wrap-login100-form-btn">
+								<div class="login100-form-bgbtn"></div>
+								<a href="index.html" class="login100-form-btn">返 回</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>

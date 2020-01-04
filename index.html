@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>个人博客系统</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="css/blog.css">
+		<link rel="stylesheet" href="css/layui.css" />
+		<script type="text/javascript" src="js/layui.js"></script>
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+
+		<script>
+			$(function() {
+				//初始化文章
+				/*initArticle();*/
+				//初始化显示类别和标签
+				initCatAndTag();
+				//使用分页
+				getPage();
+			});
+			function getPage() {
+				layui.use('laypage', function() {
+					var laypage = layui.laypage;
+					//执行一个laypage实例
+					//					alert(window.count)
+					laypage.render({
+						elem: 'test1', //注意，这里的 test1 是 ID，不用加 # 号
+						count: getData(), //数据总数
+						limit: 5,
+						limits: [5, 10, 15, 20, 25],
+						layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip'],
+						jump: function(obj) {
+							initArticle(obj.curr, obj.limit);
+						}
+					});
+				});
+			}
+
+			//跳转到文章详情页面
+
+			/*显示数据总数*/
+			function getData() {
+				$.ajax({
+						type: 'get',
+						dataType: "json",
+						async: false,
+						url: ' https://api.iocetc.com:8080/task/post',
+						success: function(res) {
+							if(res.errcode == 0) {
+								var count = res.data.count;
+								window.count = count;
+							}
+						else {
+							alert("用户信息不合法");
+						}
+					},
+					error: function() {
+						//            $("#test").html("发生错误:"+jqXHR.status);
+						alert("发生错误");
+					}
+				});
+				return window.count;
+			}
+			/*显示数据总数*/
+
+			//显示文章列表
+			function initArticle(page, size, keyword) {
+				$.ajax({
+					type: 'get',
+					dataType: "json",
+					url: ' https://api.iocetc.com:8080/task/post',
+					async:false,
+					data: {
+						"page": page,
+						"size": size,
+						"keyword": keyword
+					},
+					success: function(res) {
+						console.log(res);
+						if(res.errcode == 0) {
+							var releaseDate;
+							var title;
+							var content;
+							var count = res.data.count;
+							var views;
+							var id;
+							$("#articalList li").remove();
+							for(var i = 0; i < size; i++) {
+								releaseDate = res.data.list[i].createTime;
+								title = res.data.list[i].title;
+								id = res.data.list[i]._id;
+								content = res.data.list[i].content.substring(0, 30) + "......";
+								views = res.data.list[i].views;
+								var span1 = '<span class="date" style="font-size: 18px;">' + new Date(releaseDate).getFullYear() + "年" + (new Date(releaseDate).getMonth() + 1) + "月" + new Date(releaseDate).getDate() + "日" + '</span>';
+								var span2 = '<span class="title" style="color: #000000;">' + '<b>' +
+									'<a href=' +
+									'foreground/blog/detail.html?id=' +
+									id +
+									'>' +
+									title +
+									'</a>' +
+									'</b>' + '</span>';
+								var span3 = '<span class="content">' + "内容:  " + content + '</span><br><br><br>';
+								var span4 = '<span class="info">' +
+									'发表于' +
+									new Date(releaseDate).toLocaleDateString() + " " + new Date(releaseDate).toLocaleTimeString() +
+									'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+									'阅读（' +
+									views +
+									'）' +
+									'</span>';
+								var hr = '<hr style="height:1px; border: none; border-top: 1px dashed #b6ffd2; padding-bottom: 0px;"/>';
+
+								$('#articalList').append(
+									'<li style="margin-bottom: 30px" class="list">' +
+									span1 +
+									span2 +
+									span3 +
+									span4 +
+									hr +
+									'</li>');
+							}
+
+						} else {
+							alert("用户信息不合法");
+						}
+					},
+					error: function() {
+						//            $("#test").html("发生错误:"+jqXHR.status);
+						alert("发生错误");
+					}
+				});
+
+			}
+
+			/*初始化文章类别和文章标签*/
+			function initCatAndTag(){
+				$.ajax({
+					type: 'get',
+					dataType: "json",
+					url: 'https://api.iocetc.com:8080/task/cat',
+					async:false,
+					/*data: {
+						"page": page,
+						"size": size,
+						"keyword": keyword
+					},*/
+					success: function(res) {
+						if(res.errcode == 0) {
+							var name;
+							var _id;
+							var count;
+							for(var i = 0; i < res.data.categories.length; i++) {
+								name = res.data.categories[i].name;
+								_id = res.data.categories[i]._id;
+								count = res.data.categories[i].count;
+								var li='<li>'+
+								'<a href="#"'+
+								'>'+
+								name+
+								'<span class="badge">'+
+								count+
+								'</span>'+
+								'</a>'+
+								+
+								'</li>';
+								$("#categories").append(li);
+							}
+							
+							for(var i = 0; i < res.data.tags.length; i++) {
+								name = res.data.tags[i].name;
+								_id = res.data.tags[i]._id;
+								count = res.data.tags[i].count;
+								var li='<button class="btn btn-primary" type="button">'+
+								'<a href="#"'+
+								'>'+
+								name+
+								'<span class="badge">'+
+								count+
+								'</span>'+
+								'</a>'+
+								+
+								'</button>';
+								$("#categories").append(li);
+							}
+
+						} else {
+							alert("用户信息不合法");
+						}
+					},
+					error: function() {
+						//            $("#test").html("发生错误:"+jqXHR.status);
+						alert("发生错误");
+					}
+				});
+			}
+			/*初始化文章类别和文章标签*/
+			function checkData() {
+				var q = document.getElementById("q").value.trim();
+				if(q == null || q == "") {
+					alert("请输入您要查询的关键字！");
+					return false;
+				} else {
+					return true;
+				}
+			}
+		</script>
+
+		<style type="text/css">
+			body {
+				padding-top: 10px;
+				padding-bottom: 40px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<!--头部-->
+			<div class="row">
+				<div class="col-md-4" style="height: 60px">
+					<img alt="java个人博客系统" src="img/logo.png">
+				</div>
+				<div class="col-md-8">
+					<a href="foreground/blog/detail.html"></a>
+					<iframe style="float: right;" width="420" scrolling="no" height="60" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=12&icon=1&num=5"></iframe>
+				</div>
+			</div>
+			<!-- 头部 -->
+			<!-- 导航栏 -->
+			<div class="row">
+				<div class="col-md-12" style="padding-top: 10px">
+					<nav class="navbar navbar-default">
+						<div class="container-fluid">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+								<a class="navbar-brand" href="index.html">
+									<font color="black"><strong>首页</strong></font>
+								</a>
+							</div>
+
+							<!-- Collect the nav links, forms, and other content for toggling -->
+							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+								<ul class="nav navbar-nav">
+									<li>
+										<!--跳转到博主详细信息页面-->
+										<a href="/foreground/blogger/in">
+											<font color="black"><strong>关于博主</strong></font>
+										</a>
+									</li>
+									<li>
+										<!--跳转到登录后台页面-->
+										<a href="login.html">
+											<font color="black"><strong>登录后台</strong></font>
+										</a>
+									</li>
+								</ul>
+								<!--提交搜索的form表单，这里的action就是调用接口-->
+
+								<form action="foreground/blog/search.html" class="navbar-form navbar-right" onsubmit="return checkData()" method="get">
+									<div class="form-group">
+										<input type="text" id="q" name="q" value="" class="form-control" placeholder="请输入要查询的关键字...">
+									</div>
+									<button type="submit" class="btn btn-default">搜索</button>
+								</form>
+								<!--提交搜索的form表单-->
+							</div>
+						</div>
+					</nav>
+				</div>
+			</div>
+			<!--头部-->
+
+			<div class="row">
+				<!-- 文章列表 -->
+				<div class="col-md-9" id="list">
+					<!--文章列表-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/list.png" />最新博客
+						</div>
+						<div class="datas">
+							<ul id="articalList">
+							</ul>
+						</div>
+					</div>
+					<!--分页-->
+					<!--这里调用layui的分页插件-->
+					<div id="test1"></div>
+					<!--分页-->
+				</div>
+
+				<!--文章列表-->
+				<div class="col-md-3">
+					<!--博主信息-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/blogger_info.png" /> 博主信息
+						</div>
+						<div class="user_image">
+							<img src="img/self_img.jpg" />
+						</div>
+						<div class="nickName">${blogger.nickName}</div>
+						<div class="userSign">个性签名：(${blogger.sign})</div>
+					</div>
+					<!--博主信息-->
+
+					<!--按日志类别-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/ text_category;.png" /> 按日志类别
+						</div>
+						<div class="datas">
+							<ul id="categories">
+								<!--用Jquery操作进行赋值操作-->
+								<!--<c:forEach var="blogTypeCount" items="${blogTypeCountList}">
+									<li><span><a
+										href="${pageContext.request.contextPath}/index.jsp?typeId=${blogTypeCount.id }">${blogTypeCount.typeName}(${blogTypeCount.blogCount})
+										</a>
+									</span>
+									</li>
+								</c:forEach>-->
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志类别-->
+
+					<!--按文章标签分类-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/tag.png" />按标签分类
+						</div>
+						<div class="datas">
+							<ul id="tags">
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按文章标签分类-->
+
+					<!--按日志日期-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/date.png" /> 按日志日期
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志日期-->
+
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="img/contact.png" /> 友情链接
+						</div>
+						<div class="datas">
+							<ul>
+
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

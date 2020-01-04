@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>文章详情页面</title>
+		<!-- 导入外部文件 -->
+		<link rel="stylesheet" href="../../css/blog.css" type="text/css"></link>
+		<script type="text/javascript" src="../../js/shCore.js"></script>
+		<link rel="stylesheet" href="../../css/shCoreDefault.css">
+		<script type="text/javascript">
+			SyntaxHighlighter.all();
+		</script>
+		<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+		<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+		<link rel="stylesheet" href="../../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../../css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="../../css/blog.css">
+		<!--	<link href="${pageContext.request.contextPath}/favicon.ico" rel="SHORTCUT ICON">-->
+		<script src="../../js/jquery-3.2.1.min.js"></script>
+		<script src="../../js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+		<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+		<!-- 导入外部文件 -->
+	</head>
+
+	<body>
+		<!--头部-->
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4" style="height: 60px">
+					<img alt="java个人博客系统" src="../../img/logo.png">
+				</div>
+				<div class="col-md-8">
+					<iframe style="float: right;" width="420" scrolling="no" height="60" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=12&icon=1&num=5"></iframe>
+				</div>
+			</div>
+			<!-- 头部 -->
+			<!-- 导航栏 -->
+			<div class="row">
+				<div class="col-md-12" style="padding-top: 10px">
+					<nav class="navbar navbar-default">
+						<div class="container-fluid">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+								<a class="navbar-brand" href="../../index.html">
+									<font color="black"><strong>首页</strong></font>
+								</a>
+							</div>
+
+							<!-- Collect the nav links, forms, and other content for toggling -->
+							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+								<ul class="nav navbar-nav">
+									<li>
+										<!--跳转到博主详细信息页面-->
+										<a href="../blogger/info.html">
+											<font color="black"><strong>关于博主</strong></font>
+										</a>
+									</li>
+									<li>
+										<!--跳转到登录后台页面-->
+										<a href="/login.html">
+											<font color="black"><strong>登录后台</strong></font>
+										</a>
+									</li>
+								</ul>
+								<!--提交搜索的form表单，这里的action就是调用接口-->
+								<form action="search.html" class="navbar-form navbar-right" role="search" method="get" onsubmit="return checkData()">
+									<div class="form-group">
+										<input type="text" id="q" name="q" value="" class="form-control" placeholder="请输入要查询的关键字...">
+									</div>
+									<button type="submit" class="btn btn-default">搜索</button>
+								</form>
+								<!--提交搜索的form表单-->
+							</div>
+							<!-- /.navbar-collapse -->
+						</div>
+						<!-- /.container-fluid -->
+					</nav>
+				</div>
+			</div>
+			<!--头部-->
+			<div class="row">
+				<!-- 文章详情列表 -->
+				<div class="col-md-9">
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/text.png" /> 文章信息
+						</div>
+						<!-- 详细内容 -->
+
+						<div class="blog_title">
+							<h3>
+					<strong></strong>
+				</h3>
+						</div>
+						<!-- ######################################################################### -->
+						<!-- 分享内容 -->
+						<div style="padding-left: 330px; padding-bottom: 20px; padding-top: 10px">
+							<div class="bshare-custom">
+								<a title="分享到QQ空间" class="bshare-qzone"></a>
+								<a title="分享到新浪微博" class="bshare-sinaminiblog"></a>
+								<a title="分享到人人网" class="bshare-renren">
+								</a>
+								<a title="分享到腾讯微博" class="bshare-qqmb"></a>
+								<a title="分享到网易微博" class="bshare-neteasemb"></a>
+								<a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a>
+								<span class="BSHARE_COUNT bshare-share-count">0</span>
+							</div>
+							<script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=1&amp;lang=zh"></script>
+							<script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+						</div>
+						<!-- 分享内容 -->
+						<!-- ############################################################################ -->
+						<div class="blog_info">
+						</div>
+						<!-- 文章内容 -->
+						<div class="blog_content" style="font-size: 18px"></div>
+						<!-- 文章内容 -->
+						<!-- ***************************************************************** -->
+						<!-- 文章翻页 -->
+						<!-- ************************************************************** -->
+						<div class="blog_lastAndNextPage">
+							<button type="button" class="btn btn-success" onclick="getblog_lastAndNextPage('prev')" id="prev">上一篇</button>
+							<button type="button" class="btn btn-success" onclick="getblog_lastAndNextPage('next')" id="next">下一篇</button>
+						
+						</div>
+					</div>
+
+					<!-- 详细内容 -->
+
+					<!-- ￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥￥ -->
+
+					<!-- ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！ -->
+					<!-- 评论列表 -->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/review.png"> 评论信息
+							<!--<c:if test="${commentList.size()>10}">
+								<a href="javascript:showOtherComment()" style="float: right; padding-right: 40px;">显示所有评论</a>
+							</c:if>-->
+						</div>
+						<div class="commentDatas">
+							<div id="gitalk-container"></div>
+						</div>
+					</div>
+					<!--评论-->
+				</div>
+
+				<div class="col-md-3">
+					<!--博主信息-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/blogger_info.png" /> 博主信息
+						</div>
+						<div class="user_image">
+							<img src="../../img/self_img.jpg" />
+						</div>
+						<div class="nickName">${blogger.nickName}</div>
+						<div class="userSign">个性签名：(${blogger.sign})</div>
+					</div>
+					<!--博主信息-->
+
+					<!--按日志类别-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/ text_category;.png" /> 按日志类别
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogTypeCount" items="${blogTypeCountList}">
+									<li><span><a
+										href="${pageContext.request.contextPath}/index.jsp?typeId=${blogTypeCount.id }">${blogTypeCount.typeName}(${blogTypeCount.blogCount})</a></span></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志类别-->
+
+					<!--按文章标签分类-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/tag.png" />按标签分类
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按文章标签分类-->
+
+					<!--按日志日期-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/date.png" /> 按日志日期
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志日期-->
+
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/contact.png" /> 友情链接
+						</div>
+						<div class="datas">
+							<ul>
+								<a href="search.html"></a>
+							</ul>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<!-- 发表评论 -->
+		<!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	</body>
+	<script type="text/javascript">
+		const gitalk = new Gitalk({
+			clientID: '460285873276ecab999f',
+			clientSecret: '4f3f13e5cd26d330719f47b1cd3488f193863611',
+			repo: 'blog',
+			owner: 'lvqian0511',
+			admin: ['lvqian0511'],
+			id: location.search.substring(4), // Ensure uniqueness and length less than 50
+			perPage: 10,
+			distractionFreeMode: false // Facebook-like distraction free mode
+		})
+
+		gitalk.render('gitalk-container')
+
+		$(function() {
+			getDetail();
+		});
+		/*上一篇/下一篇*/
+		function getblog_lastAndNextPage(direction) {
+			$.ajax({
+				type: "get",
+				url: "https://api.iocetc.com:8080/task/post",
+				async: true,
+				dataType: "json",
+				data: {
+					"id": location.search.substring(4),
+					"direction": direction + ""
+				},
+				success: function(result) {
+					if(result.errcode == 0) {
+						var releaseDate;
+						var title;
+						var content;
+						var id;
+						var categroy;
+						var keyword;
+						var views;
+						
+						if(result.data==null&&direction=="prev"){
+							$("#prev").attr("disabled",true);
+							
+						}else if(result.data==null&&direction=="next"){
+							$("#next").attr("disabled",true);
+						}
+						else{
+						id = result.data._id;
+						releaseDate = result.data.createTime;
+						title = result.data.title;						
+						content = result.data.content;
+						categroy = result.data.categoryId;
+						keyword = result.data.keyword;
+						views = result.data.views;
+						location.href="http://127.0.0.1:8020/Blog/foreground/blog/detail.html?id="+id;
+						$(".blog_title h3").text(title);
+						var span1 = '发布时间:『' +
+							new Date(releaseDate).toLocaleDateString() + " " + new Date(releaseDate).toLocaleTimeString() +
+							'』&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+							'博客类别:' +
+							categroy +
+							'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;阅读:(' + views + ' 次)';
+						$(".blog_info").append(span1);
+						$(".blog_content").text(content);
+						}				
+						
+					} else {
+						alert("用户信息不合法");
+					}
+
+				},
+				error: function() {
+					//            $("#test").html("发生错误:"+jqXHR.status);
+					alert("发生错误");
+				}
+			});
+		}
+		/*上一篇/下一篇*/
+		
+		//获取详细信息
+		function getDetail() {
+			$.ajax({
+				type: 'get',
+				dataType: "json",
+				url: 'https://api.iocetc.com:8080/task/post',
+				data: {
+					"id": location.search.substring(4)
+				},
+				success: function(res) {
+					if(res.errcode == 0) {
+						console.log(res);
+						var releaseDate;
+						var title;
+						var content;
+						var id;
+						var categroy;
+						var keyword;
+						var views;
+						releaseDate = res.data.createTime;
+						title = res.data.title;
+						id = res.data._id;
+						content = res.data.content;
+						categroy = res.data.categoryId;
+						keyword = res.data.keyword;
+						views = res.data.views;
+						$(".blog_title h3").text(title);
+						var span1 = '发布时间:『' +
+							new Date(releaseDate).toLocaleDateString() + " " + new Date(releaseDate).toLocaleTimeString() +
+							'』&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+							'博客类别:' +
+							categroy +
+							'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;阅读:(' + views + ' 次)';
+						$(".blog_info").append(span1);
+						$(".blog_content").text(content);
+						/*$(".blog_lastAndNextPage")*/
+					} else {
+						alert("用户信息不合法");
+					}
+				},
+				error: function() {
+					//            $("#test").html("发生错误:"+jqXHR.status);
+					alert("发生错误");
+				}
+			});
+		}
+
+		function loajdimage() {
+			document.getElementById("randImage").src = "${pageContext.request.contextPath}/image.jsp?" +
+				Math.random();
+		}
+
+		function showOtherComment() {
+			$('.otherComment').show();
+		}
+	</script>

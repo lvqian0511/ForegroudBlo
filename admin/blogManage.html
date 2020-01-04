@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<title>文章管理</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+	<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/icon.css" type="text/css"></link>
+	<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/default/easyui.css" type="text/css"></link>
+	<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.min.js"></script>
+	<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="../jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+	</head>
+
+	<body>
+		<div id="tb">
+			<div>
+				标题 <input type="text" id="s_title" size="20" onkeydown="if(event.keyCode==13) searchBlog()">
+				<a href="javascript:searchBlog()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+				<a href="javascript:deleteBlog()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+				<a href="javascript:openBlogModifyTab()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+				<a href="javascript:reload()" class="easyui-linkbutton" iconCls="icon-reload" plain="true">刷新</a>
+			</div>
+		</div>
+		<table id="dg" title="文章管理" toolbar="#tb">
+		</table>
+
+		<!-- 打开修改页面的模态框 -->
+		<div id="dlg" class="easyui-dialog" style="width: 500px; height: 180px; padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+			<form id="fm" method="post">
+				<table cellspacing="8px">
+					<tr>
+						<td>文章类别名称</td>
+						<td><input type="text" id="typeName" name="typeName" class="easyui-validatebox" required="true"></td>
+					</tr>
+					<tr>
+						<td>文章类别排序</td>
+						<td><input type="text" id="orderNum" name="orderNum" class="easyui-numberbox" required="true" style="width: 60px">&nbsp;(文章类别会根据序号从小到大排列)
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function() {
+			showInfo();
+		});
+
+		function showInfo() {
+			var token = localStorage.getItem("token");
+			alert(token);
+			$('#dg')
+				.datagrid({
+					//请求数据的url
+					url: 'https://api.iocetc.com:8080/task/post',
+					//载入提示信息
+					loadMsg: '正在加载，请稍等',
+					//水平自动展开，如果设置此属性，则不会有水平滚动条，演示冻结列时，该参数不要设置
+					fitColumns: true,
+					//数据多的时候不换行
+					nowrap: true,
+					rownumbers: true,
+					//设置分页
+					pagination: true,
+					//设置每页显示的记录数，默认是10个
+					pageSize: 2,
+					//每页显示记录数项目
+					pageList: [2, 4, 15, 20],
+					method:'get',
+					//指定id为标识字段，在删除，更新的时候有用，如果配置此字段，在翻页时，换页不会影响选中的项
+					idField: '_id',
+					onBeforeLoad: function(param) { //这个param就是queryString
+						var page = param.page; //保存下值
+						var size = param.rows;
+						delete param.page; //删掉
+						delete param.rows;
+						param.page = page; //这里就是重新命名了！！！ ,j将page 改为了 pages
+						param.size = size;
+						console.log(param);
+					},
+					loadFilter: function(data) {
+						//过滤数据
+						console.log(data);
+						var value = {
+							total: data.data.count,
+							rows: data.data.list
+						};
+						var x = 0;
+						for(var i = 0; i < data.data.list.length; i++) { 
+							value.rows[x++] = data.data.list[i];
+						}
+						return value;
+					},
+
+					//上方工具条 添加 修改 删除 刷新按钮
+					//同列属性，但是这些列将会冻结在左侧,z大小不会改变，当宽度大于250时，会显示滚动条，但是冻结的列不在滚动条内
+					frozenColumns: [
+						[{
+								field: 'checkbox',
+								checkbox: true
+							}, //复选框
+							/*{
+								field: '_id',
+								title: '编号',
+								width: 200
+							} //id字段*/
+						]
+					],
+					columns: [
+						[{
+								field: 'title',
+								title: '文章标题',
+								width: 300
+							},
+							{
+								field: 'createTime',
+								title: '发布日期',
+								width: 300
+							},
+							{
+								field: 'categoryId',
+								title: '文章类型',
+								width: 200,
+								/*formatter: function(val, row) {
+									return val.typeName;
+								}*/
+							},
+							{
+								field: 'tagId',
+								title: '文章标签类型',
+								width: 200,
+								/*formatter: function(val, row) {
+									return val.typeName;
+								}*/
+							},
+							{
+								field: 'status',
+								title: '状态',
+								width: 200,
+								formatter: function(val, row) {
+									if(val == 0) {
+										return "已发表";
+									} else if(val == 1) {
+										return "草稿";
+									} else if(val == 2) {
+										return "已删除";
+									}
+
+								}
+							}
+						]
+					],
+				});
+		}
+		/* 按照title查询文章信息*/
+		function searchBlog() {
+			$("#dg").datagrid("load", {
+				"keyword": $("#s_title").val()
+			});
+		}
+		/**
+		 * 删除文章信息
+		 * 可以多选
+		 */
+		function deleteBlog() {
+			//获取选中要删除的行
+			var selectedRows = $("#dg").datagrid("getSelections");
+			//判断是否有选择的行
+			if(selectedRows.length == 0) {
+				$.messager.alert("系统提示", "请选择要删除的数据");
+				return;
+			}
+			//定义选中 选中id数组
+			var idsStr = [];
+			//循环遍历将选中行的id push进入数组
+			for(var i = 0; i < selectedRows.length; i++) {
+				idsStr.push(selectedRows[i].id);
+			}
+			//将数组安装,连接成字符串
+			var ids = idsStr.join(","); //1,2,3,4
+			//提示是否确认删除
+			$.messager.confirm("系统提示", "<font color=red>您确定要删除选中的" +
+				selectedRows.length + "条数据么？</font>",
+				function(r) {
+					//确定删除
+					if(r) {
+						//发送ajax请求
+						$.post("${blog}/admin/blog/delete", {
+							ids: ids
+						}, function(result) {
+							if(result.success) {
+								$.messager.alert("系统提示", "数据删除成功！");
+								$("#dg").datagrid("reload");
+							} else {
+								$.messager.alert("系统提示", "数据删除失败！");
+							}
+						}, "json");
+					}
+				});
+		}
+		/**
+		 *打开修改文章界面
+		 */
+		function openBlogModifyTab() {
+			var selectedRows = $("#dg").datagrid("getSelections");
+			//确保被选中行只能为一行
+			if(selectedRows.length != 1) {
+				$.messager.alert("系统提示", "请选择一个要修改的文章类别");
+				return;
+			}
+			//获取选中行id
+			var row = selectedRows[0];
+			//打开对话框并且设置标题
+			$("#dlg").dialog("open").dialog(
+				"setTitle", "修改文章类别信息");
+			//将数组回显对话框中
+			$("#fm").form("load", row); //会自动识别name属性，将row中对应的数据，填充到form表单对应的name属性中
+			//在url中添加id 后台就能识别是更新操作
+			url = "${blog}/admin/blogType/save?id=" + row.id;
+		}
+		/**
+		 * 重新载入数据
+		 */
+		function reload() {
+			$("#dg").datagrid("reload");
+		}
+	</script>
+
+</html>

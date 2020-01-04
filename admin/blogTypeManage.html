@@ -1,0 +1,325 @@
+<!Doctype html>
+<html lang="en">
+
+	<head>
+		<title>博客类别管理</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/icon.css" type="text/css"></link>
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/default/easyui.css" type="text/css"></link>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+	</head>
+	<script>
+		$(function() {
+			/*var token = localStorage.getItem("token");
+			alert(token);*/
+			/*initCatgeoryDate();*/
+			//datagrid初始化
+			datagrid();
+
+		});
+
+		/*使用easyui的datagrid*/
+		function datagrid() {
+			var token = localStorage.getItem("token");
+			$('#dg').datagrid({
+				//请求数据的url
+				url: 'https://api.iocetc.com:8080/task/admin/category',
+				//载入提示信息
+				loadMsg: 'loading...',
+				//水平自动展开，如果设置此属性，则不会有水平滚动条，演示冻结列时，该参数不要设置
+				fitColumns: true,
+				//数据多的时候不换行
+				nowrap: true,
+				rownumbers: true,
+				//设置分页
+				pagination: true,
+				//设置每页显示的记录数，默认是10个
+				pageSize: 2,
+				//每页显示记录数项目
+				pageList: [2, 4, 15, 20],
+				//指定id为标识字段，在删除，更新的时候有用，如果配置此字段，在翻页时，换页不会影响选中的项
+				idField: 'id',
+				//上方工具条 添加 修改 删除 刷新按钮
+				headers: {
+					"Authorization": "Bearer " + localStorage.getItem("token")
+				},
+				method: 'get',
+				onBeforeLoad: function(param) { //这个param就是queryString
+					var page = param.page; //保存下值
+					var size = param.rows;
+					delete param.page; //删掉
+					delete param.rows;
+					param.page = page; //这里就是重新命名了！！！ ,j将page 改为了 pages
+					param.size = size;
+					console.log(param);
+				},
+				loadFilter: function(data) {
+					//过滤数据
+					console.log(data);
+					var value = {
+						total: data.data.count,
+						rows: data.data.list
+					};
+					var x = 0;
+					for(var i = 0; i < data.data.list.length; i++) { 
+						value.rows[x++] = data.data.list[i];
+					}
+					return value;
+				},
+				/*onLoadSuccess: function(data) {
+					alert(data);
+				},*/
+				toolbar: [{
+						iconCls: 'icon-add', //图标
+						text: '添加', //名称
+						handler: function() { //回调函数
+							//打开对话框并且设置标题
+							$("#dlg").dialog("open").dialog(
+								"setTitle", "添加博客类别信息");
+							//将url设置为添加
+							url = "${blog}/admin/blogType/save";
+						}
+					},
+					'-',
+					{
+						iconCls: 'icon-edit',
+						text: '修改',
+						handler: function() {
+							//获取选中要修改的行
+							var selectedRows = $("#dg")
+								.datagrid("getSelections");
+							//确保被选中行只能为一行
+							if(selectedRows.length != 1) {
+								$.messager.alert("系统提示",
+									"请选择一个要修改的博客类别");
+								return;
+							}
+							//获取选中行id
+							var row = selectedRows[0];
+							//打开对话框并且设置标题
+							$("#dlg").dialog("open").dialog(
+								"setTitle", "修改博客类别信息");
+							//将数组回显对话框中
+							$("#fm").form("load", row); //会自动识别name属性，将row中对应的数据，填充到form表单对应的name属性中
+							//在url中添加id 后台就能识别是更新操作
+							url = "${blog}/admin/blogType/save?id=" +
+								row.id;
+						}
+
+					},
+					'-',
+					{
+						iconCls: 'icon-edit',
+						text: '删除',
+						handler: function() {
+							//获取选中要删除的行
+							var selectedRows = $("#dg")
+								.datagrid("getSelections");
+							//判断是否有选择的行
+							if(selectedRows.length == 0) {
+								$.messager.alert("系统提示",
+									"请选择要删除的数据");
+								return;
+							}
+							//定义选中 选中id数组
+							var idsStr = [];
+							//循环遍历将选中行的id push进入数组
+							for(var i = 0; i < selectedRows.length; i++) {
+								idsStr.push(selectedRows[i].id);
+							}
+							//将数组安装,连接成字符串
+							var ids = idsStr.join(","); //1,2,3,4
+							//提示是否确认删除
+							$.messager.confirm("系统提示",
+								"<font color=red>您确定要删除选中的" +
+								selectedRows.length + "条数据么？</font>",
+								function(r) {
+									if(r) {
+										$.post(
+											"${blog}/admin/blogType/delete", {
+												ids: ids
+											},
+											function(result) {
+												alert(result);
+												if(result.exist) {
+													$.messager
+														.alert("系统提示",
+															'该类别下有博客，不能删除!');
+												} else if(result.success) {
+													$.messager
+														.alert(
+															"系统提示",
+															"数据删除成功！");
+													$("#dg")
+														.datagrid(
+															"reload");
+												} else {
+													$.messager
+														.alert(
+															"系统提示",
+															"数据删除失败！");
+												}
+											},
+											"json");
+									}
+								});
+
+						}
+					}, '-', {
+						iconCls: 'icon-reload',
+						text: '刷新',
+						handler: function() {
+							$("#dg").datagrid("reload");
+						}
+					}
+				],
+				//同列属性，但是这些列将会冻结在左侧,z大小不会改变，当宽度大于250时，会显示滚动条，但是冻结的列不在滚动条内
+				frozenColumns: [
+					[{
+							field: 'checkbox',
+							checkbox: true
+						}, //复选框
+						{
+							field: '_id',
+							title: '编号',
+							width: 200
+						} //id字段
+					]
+				],
+				columns: [
+					[{
+						field: 'name',
+						title: '类型名称',
+						width: 300
+					}]
+				],
+			});
+		}
+
+		function getHeaders() {
+			var req = new XMLHttpRequest();
+			req.open('GET', document.location.href, false);
+			req.send(null);
+			var headerArr = req.getAllResponseHeaders().split('\n');
+			var headers = {};
+			headerArr.forEach(item => {
+				if(item !== '') {
+					var index = item.indexOf(':');
+					var key = item.slice(0, index);
+					var value = item.slice(index + 1).trim();
+					headers[key] = value
+				}
+
+			})
+			return headers;
+		}
+			/*使用easyui的datagrid*/
+			/*初始化数据*/
+			function initCatgeoryDate() {
+				var token = localStorage.getItem("token");
+				$.ajax({
+					headers: {
+						"Authorization": "Bearer " + token
+					},
+					type: 'get',
+					url: 'https://api.iocetc.com:8080/task/admin/category',
+					/*data:{
+						"page":"1",
+						"size":"5"
+					},*/
+					async: false,
+					dataType: 'json',
+					success: function(res) {
+						window.res = res;
+						if(res.errcode == 0) {
+							console.log(res);
+							for(var i = 0; i < res.data.count; i++) {
+								var row_data = {
+									'_id': res.data.list[i]._id,
+									'name': res.data.list[i].name
+								};
+
+								 
+								$('#dg').datagrid('loadData',  row_data);
+							}
+						} else {
+							window.location.href = "http://127.0.0.1:8020/Blog/login.html?"
+						}
+
+					},
+					error: function() {
+						alert('error');
+					}
+				});
+
+			}
+			/*初始化数据*/
+			//定义全局url 用于修改与添加操作
+			var url;
+
+		//省略其他代码  让url声明在第一行
+		/**
+		 * 添加或者修改博客类别
+		 */
+		function saveBlogType() {
+			$("#fm").form("submit", {
+				url: url,
+				onSubmit: function() {
+					return $(this).form("validate");
+				}, //进行验证，通过才让提交
+				success: function(result) {
+					//就是说这里的result返回的已经是一个
+					//这里返回的是result.success是一个false
+					var result = eval("(" + result + ")"); //将json格式的result转换成js对象
+					if(!result.success) {
+						$.messager.alert("系统提示", "博客类别保存成功");
+						$("typeName").val(""); //保存成功后将内容置空
+						$("typeNum").val("");
+						$("#dlg").dialog("close"); //关闭对话框
+						$("#dg").datagrid("reload"); //刷新一下
+					} else {
+						$.messager.alert("系统提示", "博客类别保存失败");
+						return;
+					}
+				}
+			});
+		}
+
+		function closeBlogTypeDialog() {
+			$("typeName").val(""); //保存成功后将内容置空
+			$("typeNum").val("");
+			$("#dlg").dialog("close"); //关闭对话框
+		}
+	</script>
+
+	<body>
+		<table id="dg"></table>
+
+		<div id="dlg" class="easyui-dialog" style="width: 500px; height: 180px; padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+			<form id="fm" method="post">
+				<table cellspacing="8px">
+					<tr>
+						<td>博客类别名称</td>
+						<td><input type="text" id="typeName" name="typeName" class="easyui-validatebox" required="true"></td>
+					</tr>
+					<tr>
+						<td>博客类别排序</td>
+						<td><input type="text" id="orderNum" name="orderNum" class="easyui-numberbox" required="true" style="width: 60px">&nbsp;(博客类别会根据序号从小到大排列)
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+
+		<div id="dlg-buttons">
+			<div>
+				<a href="javascript:saveBlogType()" class="easyui-linkbutton" iconCls="icon-ok" plain="true">保存</a>
+				<a href="javascript:closeBlogTypeDialog()" class="easyui-linkbutton" iconCls="icon-cancel" plain="true">关闭</a>
+			</div>
+		</div>
+	</body>
+
+</html>

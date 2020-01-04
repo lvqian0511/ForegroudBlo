@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/icon.css" type="text/css"></link>
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/default/easyui.css" type="text/css"></link>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+	</head>
+
+	<body>
+		<table class="easyui-datagrid">
+		</table>
+	</body>
+	<script>
+		$(function() {
+			// 先通过ajax获取数据，然后再传给datagrid
+			var token = localStorage.getItem("token");
+			alert(token);
+			$.ajax({
+				headers:{
+			   		"Authorization":"Bearer "+token
+			   	},
+				type: 'get',
+				url: 'https://api.iocetc.com:8080/task/admin/tag',
+				/*async: false,*/
+				dataType: 'json',
+				data:{
+					"page":"1",
+					"size":"5"
+				},
+			   	
+
+				success: function(res) {
+					if(res.errcode == 0) {
+						console.log(res);
+					}else{
+						window.location.href="http://127.0.0.1:8020/Blog/login.html?"
+					}
+					
+				},
+				error: function() {
+					alert('error');
+				}
+			});
+		});
+	</script>
+
+</html>

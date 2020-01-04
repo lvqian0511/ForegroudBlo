@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>查询结果</title>
+		<!-- 导入外部文件 -->
+		<link rel="stylesheet" href="../../css/blog.css" type="text/css"></link>
+		<link rel="stylesheet" href="../../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../../css/bootstrap-theme.min.css">
+		<script src="../../js/jquery-3.2.1.min.js"></script>
+		<script src="../../js/bootstrap.min.js"></script>
+		<!-- 导入外部文件 -->
+	</head>
+
+	<body>
+
+		<!--头部-->
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4" style="height: 60px">
+					<img alt="java个人博客系统" src="../../img/logo.png">
+				</div>
+				<div class="col-md-8">
+					<iframe style="float: right;" width="420" scrolling="no" height="60" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=12&icon=1&num=5"></iframe>
+				</div>
+			</div>
+			<!-- 头部 -->
+			<!-- 导航栏 -->
+			<div class="row">
+				<div class="col-md-12" style="padding-top: 10px">
+					<nav class="navbar navbar-default">
+						<div class="container-fluid">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+								<a class="navbar-brand" href="../../index.html">
+									<font color="black"><strong>首页</strong></font>
+								</a>
+							</div>
+
+							<!-- Collect the nav links, forms, and other content for toggling -->
+							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+								<ul class="nav navbar-nav">
+									<li>
+										<!--跳转到博主详细信息页面-->
+										<a href="../blogger/info.html">
+											<font color="black"><strong>关于博主</strong></font>
+										</a>
+									</li>
+									<li>
+										<!--跳转到登录后台页面-->
+										<a href="/login.html">
+											<font color="black"><strong>登录后台</strong></font>
+										</a>
+									</li>
+								</ul>
+								<!--提交搜索的form表单，这里的action就是调用接口-->
+								<form action="search.html" class="navbar-form navbar-right" role="search" method="get" onsubmit="return checkData()">
+									<div class="form-group">
+										<input type="text" id="q" name="q" value="" class="form-control" placeholder="请输入要查询的关键字...">
+									</div>
+									<button type="submit" class="btn btn-default">搜索</button>
+								</form>
+								<!--提交搜索的form表单-->
+							</div>
+							<!-- /.navbar-collapse -->
+						</div>
+						<!-- /.container-fluid -->
+					</nav>
+				</div>
+			</div>
+			<div class="row">
+				<!-- 搜索结果 -->
+				<div class="col-md-9">
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/search.png" /> 搜索&nbsp;
+							<font color="red">${q}</font>&nbsp;的结果 &nbsp;(总共搜索到&nbsp;${resultTotal}&nbsp;条记录)
+						</div>
+						<div class="datas search">
+							<ul>
+								<c:choose>
+									<c:when test="${blogList.size()==0 }">
+										<div align="center" style="padding-top: 20px">未查询到结果，请换个关键字试试看！</div>
+									</c:when>
+									<c:otherwise>
+										<c:forEach var="blog" items="${blogList }">
+											<li style="margin-bottom: 20px"><span class="title">
+												<a href="${pageContext.request.contextPath}/blog/articles/${blog.id}.html"
+									target="_blank">${blog.title }</a></span> <span class="summary">摘要:
+									${blog.content }...</span> <span class="link"><a
+									href="${pageContext.request.contextPath}/blog/articles/${blog.id}.html">http://blog.java1234.com/blog/articles/${blog.id}.html</a>&nbsp;&nbsp;&nbsp;&nbsp;发布日期：${blog.releaseDateStr }</span>
+											</li>
+										</c:forEach>
+									</c:otherwise>
+								</c:choose>
+							</ul>
+						</div>
+						${pageCode}
+					</div>
+					</div>
+					<div class="col-md-3">
+					<!--博主信息-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/blogger_info.png" /> 博主信息
+						</div>
+						<div class="user_image">
+							<img src="../../img/self_img.jpg" />
+						</div>
+						<div class="nickName">${blogger.nickName}</div>
+						<div class="userSign">个性签名：(${blogger.sign})</div>
+					</div>
+					<!--博主信息-->
+
+					<!--按日志类别-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/ text_category;.png" /> 按日志类别
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogTypeCount" items="${blogTypeCountList}">
+									<li><span><a
+										href="${pageContext.request.contextPath}/index.jsp?typeId=${blogTypeCount.id }">${blogTypeCount.typeName}(${blogTypeCount.blogCount})</a></span></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志类别-->
+
+					<!--按文章标签分类-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/tag.png" />按标签分类
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按文章标签分类-->
+
+					<!--按日志日期-->
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/date.png" /> 按日志日期
+						</div>
+						<div class="datas">
+							<ul>
+								<!--用Jquery操作进行赋值操作-->
+								<c:forEach var="blogCount" items="${blogCountList}">
+									<li></li>
+								</c:forEach>
+								<!--用Jquery操作进行赋值操作-->
+							</ul>
+						</div>
+					</div>
+					<!--按日志日期-->
+
+					<div class="data_list">
+						<div class="data_list_title">
+							<img src="../../img/contact.png" /> 友情链接
+						</div>
+						<div class="datas">
+							<ul>
+
+							</ul>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>写博客</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/icon.css" type="text/css"></link>
+		<link rel="stylesheet" href="../jquery-easyui-1.3.3/themes/default/easyui.css" type="text/css"></link>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript" src="../ueditor/ueditor.config.js" charset="gbk"></script>
+		<script type="text/javascript" src="../ueditor/ueditor.all.min.js" charset="gbk"></script>
+		<script type="text/javascript" src="../ueditor/lang/zh-cn/zh-cn.js" charset="gbk"></script>
+	</head>
+
+	<body>
+
+		<body style="margin: 10px; font-family: microsoft yahei">
+
+			<div id="p" class="easyui-panel" title="编写文章" style="padding: 10px;">
+
+				<table cellspacing="20px">
+					<tr>
+						<td width="80px">文章标题：</td>
+						<td><input type="text" id="title" name="title" style="width:400px" /></td>
+					</tr>
+					<tr>
+						<td>所属类别：</td>
+						<td>
+							<select id="blogTypeId" class="easyui-combobox" name="" style="width:154px" editable="false" panelHeight="auto">
+									<option value="">请选择文章分类...</option>
+							</select>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>所属标签：</td>
+						<td>
+							<select id="blogTagId" class="easyui-combobox" name="" style="width:154px" editable="false" panelHeight="auto">
+								<option value="">请选择文章标签...</option>
+							</select>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td valign="top">文章内容：</td>
+						<td>
+							<script id="editor" name="content" type="text/plain" style="width:95%; height:200px;"></script>
+						</td>
+					</tr>
+
+					<tr>
+						<td>文章状态：</td>
+						<td>
+							<select id="status" class="easyui-combobox" name="blogType.id" style="width:154px" editable="false" panelHeight="auto">
+								<option value="">请选择状态...</option>
+								<c:forEach items="${blogTypeCountList}" var="blogType">
+									<option value="${blogType.id}">${blogType.typeName}</option>
+								</c:forEach>
+							</select>
+						</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>
+							<a href="javascript:submitData()" class="easyui-linkbutton" data-options="iconCls:'icon-submit'">发布博客</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<!-- 实例化编辑器 -->
+			<!--<script type="text/javascript">
+				
+			</script>-->
+			<script type="text/javascript">
+				$(function() {
+					var ue = UE.getEditor('editor');
+					initCatAndTag();
+				});
+
+				function initCatAndTag() {
+					var dataCatgery = [];
+					var dataTag = [];
+					$.ajax({
+						url: "https://api.iocetc.com:8080/task/cat",
+						type: "get",
+						async: false,
+						dataType: "json",
+						success: function(res) {
+							var name;
+							var _id;
+							var count;
+							console.log(res);
+							/*初始化类别*/
+							for(var i = 0; i < res.data.categories.length; i++) {
+								dataCatgery.push({
+									"value": res.data.categories[i]._id,
+									"text": res.data.categories[i].name
+								});
+								$("#blogTypeId").combobox("loadData", dataCatgery);
+							}
+
+							/*初始化类别*/
+
+							/*初始化标签*/
+							for(var i = 0; i < res.data.tags.length; i++) {
+								dataTag.push({
+									"value": res.data.tags[i]._id,
+									"text": res.data.tags[i].name
+								});
+								$("#blogTagId").combobox("loadData", dataTag);
+							}
+							/*初始化标签*/
+						},
+						error: function() {
+							alert("发生错误");
+						}
+					});
+				}
+				/**
+				 * 发布博客
+				 */
+				function submitData() {
+					//获取博客标题
+					var title = $("#title").val();
+					//获取博客类别id
+					var blogTypeId = $("#blogTypeId").combobox("getValue");
+					//获取博客内容 带标记				
+					var blogTagId = $("#blogTagId").combobox("getValue");
+					var content = UE.getEditor('editor').getContent();
+					var status = $("#status").combobox("getValue");
+					//校验
+					if(title == null || title == '') {
+						$.messager.alert("系统提示", "请输入标题！");
+					} else if(blogTypeId == null || blogTypeId == '') {
+						$.messager.alert("系统提示", "请选择博客类型！");
+					} else if(content == null || content == '') {
+						$.messager.alert("系统提示", "请编辑博客内容！");
+					} else {
+						//ajax请求 请求后台写博客接口
+						$.post("${blog}/admin/blog/save", {
+							'title': title,
+							'blogType.id': blogTypeId,
+							'content': content,
+							'summary': summary,
+							'keyWord': keyWord
+							/*  'contentNoTag' : contentNoTag */
+						}, function(result) {
+							if(!result.success) {
+								$.messager.alert("系统提示", "博客发布成功！");
+								clearValues();
+							} else {
+								$.messager.alert("系统提示", "博客发布失败！");
+							}
+						}, "json");
+					}
+				}
+				//清空功能
+				function clearValues() {
+					$("#title").val("");
+					$("#blogTypeId").combobox("setValue", "");
+					UE.getEditor("editor").setContent("");
+					$("#keyWord").val("");
+				}
+			</script>
+		</body>
+	</body>
+
+</html>
